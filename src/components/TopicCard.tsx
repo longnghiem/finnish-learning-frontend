@@ -1,32 +1,47 @@
-import type {TopicResponse} from "../types";
-import {Link} from "react-router-dom";
-import {topicImages} from "../assets/topics";
+import { useState } from 'react'
+import type { TopicResponse } from '../types'
+import { Link } from 'react-router-dom'
+import { topicImages } from '../assets/topics'
+import { useTheme } from '../theme/index.tsx'
 
 interface TopicCardProps {
-    topic: TopicResponse;
+  topic: TopicResponse
 }
 
-/**
- * A clickable card representing a single Finnish learning topic.
- */
 export function TopicCard({ topic }: TopicCardProps) {
-    return (
-        <Link
-            to={`/topics/${topic.id}`}
-            className="group overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition-all hover:shadow-md hover:scale-[1.02]"
-        >
-            <div className="aspect-[4/3] overflow-hidden">
-                <img
-                    src={topicImages[topic.id]}
-                    alt={topic.name}
-                    className="h-full w-full object-cover transition-transform group-hover:scale-105"
-                />
-            </div>
-            <div className="px-4 py-3">
-                <h2 className="text-center text-lg font-semibold text-gray-800">
-                    {topic.name}
-                </h2>
-            </div>
-        </Link>
-    );
+  const { th } = useTheme()
+  const [hovered, setHovered] = useState(false)
+
+  return (
+    <Link
+      to={`/topics/${topic.id}`}
+      style={{
+        display: 'block', textDecoration: 'none',
+        background: th.surface, border: `1px solid ${th.border}`,
+        borderRadius: '16px', overflow: 'hidden', cursor: 'pointer',
+        boxShadow: hovered ? th.cardShadowHover : th.cardShadow,
+        transform: hovered ? 'scale(1.025) translateY(-2px)' : 'scale(1)',
+        transition: 'box-shadow 200ms ease, transform 200ms ease',
+      }}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div style={{ aspectRatio: '4/3', overflow: 'hidden' }}>
+        <img
+          src={topicImages[topic.id]}
+          alt={topic.name}
+          style={{
+            width: '100%', height: '100%', objectFit: 'cover', display: 'block',
+            transform: hovered ? 'scale(1.06)' : 'scale(1)',
+            transition: 'transform 350ms ease',
+          }}
+        />
+      </div>
+      <div style={{ padding: '14px 18px 16px' }}>
+        <p style={{ fontSize: '1.05rem', fontWeight: 700, color: th.text, margin: 0, textWrap: 'pretty' } as React.CSSProperties}>
+          {topic.name}
+        </p>
+      </div>
+    </Link>
+  )
 }

@@ -1,64 +1,59 @@
-import type {SearchType} from "../types";
+import type { SearchType } from '../types'
+import { useTheme } from '../theme/index.tsx'
+import { useLang } from '../lang/index.tsx'
 
 interface SearchBarProps {
-    /** The active search mode. */
-    searchType: SearchType;
-    /** The current search input value. */
-    searchTerm: string;
-    /** Called when the user switches between VERB and SENTENCE. */
-    onSearchTypeChange: (type: SearchType) => void;
-    /** Called on every keystroke in the search input. */
-    onSearchTermChange: (term: string) => void;
+  searchType: SearchType
+  searchTerm: string
+  onSearchTypeChange: (type: SearchType) => void
+  onSearchTermChange: (term: string) => void
 }
 
-/**
- * A controlled search bar with toggle buttons for search type.
- *
- * Provides two toggle buttons ("Word" for `VERB`, "Sentence" for `SENTENCE`)
- * and a text input. The active toggle is visually highlighted.
- *
- * Debouncing is **not** handled here — it is the parent's responsibility
- * to debounce before passing the term to the data-fetching hook.
- *
- */
-export function SearchBar({
-  searchType,
-  searchTerm,
-  onSearchTypeChange,
-  onSearchTermChange,
-}: SearchBarProps) {
-    const baseBtn =
-        "rounded-md px-4 py-2 text-sm font-medium transition-colors";
-    const activeBtn = "bg-blue-500 text-white";
-    const inactiveBtn = "bg-gray-200 text-gray-700 hover:bg-gray-300";
+export function SearchBar({ searchType, searchTerm, onSearchTypeChange, onSearchTermChange }: SearchBarProps) {
+  const { th } = useTheme()
+  const { L } = useLang()
 
-    return (
-        <div className="flex items-center gap-3">
-            <div className="flex gap-1">
-                <button
-                    type="button"
-                    onClick={() => onSearchTypeChange("VERB")}
-                    className={`${baseBtn} ${searchType === "VERB" ? activeBtn : inactiveBtn}`}
-                >
-                    Word
-                </button>
-                <button
-                    type="button"
-                    onClick={() => onSearchTypeChange("SENTENCE")}
-                    className={`${baseBtn} ${searchType === "SENTENCE" ? activeBtn : inactiveBtn}`}
-                >
-                    Sentence
-                </button>
-            </div>
-            <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => onSearchTermChange(e.target.value)}
-                placeholder={
-                    searchType === "VERB" ? "Search by word..." : "Search by sentence..."
-                }
-                className="flex-1 rounded-md border border-gray-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-        </div>
-    );
+  const activeBtn: React.CSSProperties = {
+    borderRadius: '8px', background: th.amber, color: '#2f3d56',
+    padding: '7px 16px', fontSize: '0.8rem', fontWeight: 700,
+    border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 150ms',
+  }
+  const inactiveBtn: React.CSSProperties = {
+    ...activeBtn, background: th.surfaceAlt, color: th.textSub,
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+        <button
+          type="button"
+          style={searchType === 'VERB' ? activeBtn : inactiveBtn}
+          onClick={() => onSearchTypeChange('VERB')}
+        >
+          {L.word}
+        </button>
+        <button
+          type="button"
+          style={searchType === 'SENTENCE' ? activeBtn : inactiveBtn}
+          onClick={() => onSearchTypeChange('SENTENCE')}
+        >
+          {L.sentence}
+        </button>
+      </div>
+      <input
+        type="text"
+        value={searchTerm}
+        onChange={e => onSearchTermChange(e.target.value)}
+        placeholder={searchType === 'VERB' ? L.searchByWord : L.searchBySentence}
+        style={{
+          flex: 1, borderRadius: '8px', border: `1px solid ${th.borderInput}`,
+          background: th.surface, color: th.text,
+          padding: '8px 14px', fontSize: '0.875rem', fontFamily: 'inherit', outline: 'none',
+          transition: 'border-color 150ms, box-shadow 150ms',
+        }}
+        onFocus={e => { e.target.style.borderColor = th.accent; e.target.style.boxShadow = `0 0 0 2px ${th.accent}33` }}
+        onBlur={e => { e.target.style.borderColor = th.borderInput; e.target.style.boxShadow = 'none' }}
+      />
+    </div>
+  )
 }

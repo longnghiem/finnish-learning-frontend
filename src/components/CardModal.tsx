@@ -1,289 +1,192 @@
-import type {CardResponse} from "../types";
-import {useCreateCard, useUpdateCard} from "../hooks";
-import {useEffect, useMemo, useRef, useState} from "react";
-import {getImageUrl} from "../api";
-import {createCardSchema, editCardSchema} from "../schemas";
+import type { CardResponse } from '../types'
+import { useCreateCard, useUpdateCard } from '../hooks'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { getImageUrl } from '../api'
+import { createCardSchema, editCardSchema } from '../schemas'
+import { useTheme } from '../theme/index.tsx'
+import { useLang } from '../lang/index.tsx'
 
 interface CardModalProps {
-    /** Whether the modal is for creating a new card or editing an existing one. */
-    mode: "create" | "edit";
-    /** The topic ID to associate with a new card. */
-    topicId: number;
-    /** The card to edit (only provided in edit mode). */
-    card?: CardResponse;
-    /** Callback to close the modal. */
-    onClose: () => void;
+  mode: 'create' | 'edit'
+  topicId: number
+  card?: CardResponse
+  onClose: () => void
 }
 
-/**
- * A modal dialog for creating or editing a flashcard.
- *
- * - **Create mode**: All fields start empty; image is required.
- * - **Edit mode**: Text fields are pre-filled from `card`; the existing
- *   image is shown as a preview. A new image is only sent if the user
- *   selects one.
- *
- * Uses Zod schemas (`createCardSchema` / `editCardSchema`) for validation.
- * Submission delegates to `useCreateCard` or `useUpdateCard` hooks, which
- * handle `FormData` construction and cache invalidation.
- *
- * Dismissible via the Escape key, the backdrop click, or the Cancel / X buttons.
- */
 export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
-    const createCard = useCreateCard();
-    const updateCard = useUpdateCard()
+  const { th } = useTheme()
+  const { L } = useLang()
+  const createCard = useCreateCard()
+  const updateCard = useUpdateCard()
 
-    const [name, setName] = useState(card?.name ?? "");
-    const [exampleSentence, setExampleSentence] = useState(
-        card?.exampleSentence ?? "",
-    );
-    const [translation, setTranslation] = useState(card?.translation ?? "");
-    const [imageFile, setImageFile] = useState<File | null>(null);
+  const [name, setName] = useState(card?.name ?? '')
+  const [exampleSentence, setExampleSentence] = useState(card?.exampleSentence ?? '')
+  const [translation, setTranslation] = useState(card?.translation ?? '')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
-    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-    const [submitError, setSubmitError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-    const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewUrl = useMemo(() => {
+    if (imageFile) return URL.createObjectURL(imageFile)
+    return card ? getImageUrl(card.imageUrl) : null
+  }, [imageFile, card])
 
-    // --- Image preview (derived, not state) ---
-    const previewUrl = useMemo(() => {
-        if (imageFile) return URL.createObjectURL(imageFile);
-        return card ? getImageUrl(card.imageUrl) : null;
-    }, [imageFile, card]);
+  useEffect(() => {
+    if (!imageFile || !previewUrl) return
+    return () => URL.revokeObjectURL(previewUrl)
+  }, [imageFile, previewUrl])
 
-    // Cleanup blob URL when imageFile changes or component unmounts
-    useEffect(() => {
-        if (!imageFile || !previewUrl) return;
-        return () => URL.revokeObjectURL(previewUrl);
-    }, [imageFile, previewUrl]);
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', fn)
+    return () => document.removeEventListener('keydown', fn)
+  }, [onClose])
 
-    // --- Escape key ---
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [onClose]);
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
 
-    // --- Prevent background scrolling ---
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, []);
+  const isPending = createCard.isPending || updateCard.isPending
 
-    const isPending = createCard.isPending || updateCard.isPending;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setFieldErrors({})
+    setSubmitError(null)
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setFieldErrors({});
-        setSubmitError(null);
-
-        if (mode === "create") {
-            const result = createCardSchema.safeParse({
-                name,
-                exampleSentence,
-                translation,
-                image: imageFile,
-            });
-
-            if (!result.success) {
-                const errors: Record<string, string> = {};
-                for (const issue of result.error.issues) {
-                    const key = String(issue.path[0]);
-                    if (!errors[key]) errors[key] = issue.message;
-                }
-                setFieldErrors(errors);
-                return;
-            }
-
-            try {
-                await createCard.mutateAsync({
-                    name: result.data.name,
-                    exampleSentence: result.data.exampleSentence,
-                    translation: result.data.translation,
-                    topicId,
-                    image: result.data.image,
-                });
-                onClose();
-            } catch (err) {
-                setSubmitError(err instanceof Error ? err.message : "Failed to create card.");
-            }
-        } else {
-            const result = editCardSchema.safeParse({
-                name,
-                exampleSentence,
-                translation,
-                image: imageFile ?? undefined,
-            });
-
-            if (!result.success) {
-                const errors: Record<string, string> = {};
-                for (const issue of result.error.issues) {
-                    const key = String(issue.path[0]);
-                    if (!errors[key]) errors[key] = issue.message;
-                }
-                setFieldErrors(errors);
-                return;
-            }
-
-            try {
-                await updateCard.mutateAsync({
-                    id: card!.id,
-                    data: {
-                        name: result.data.name,
-                        exampleSentence: result.data.exampleSentence,
-                        translation: result.data.translation,
-                        image: result.data.image,
-                    },
-                });
-                onClose();
-            } catch (err) {
-                setSubmitError(err instanceof Error ? err.message : "Failed to update card.");
-            }
+    if (mode === 'create') {
+      const result = createCardSchema.safeParse({ name, exampleSentence, translation, image: imageFile })
+      if (!result.success) {
+        const errors: Record<string, string> = {}
+        for (const issue of result.error.issues) {
+          const key = String(issue.path[0])
+          if (!errors[key]) errors[key] = issue.message
         }
-    };
+        setFieldErrors(errors)
+        return
+      }
+      try {
+        await createCard.mutateAsync({ name: result.data.name, exampleSentence: result.data.exampleSentence, translation: result.data.translation, topicId, image: result.data.image })
+        onClose()
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Failed to create card.')
+      }
+    } else {
+      const result = editCardSchema.safeParse({ name, exampleSentence, translation, image: imageFile ?? undefined })
+      if (!result.success) {
+        const errors: Record<string, string> = {}
+        for (const issue of result.error.issues) {
+          const key = String(issue.path[0])
+          if (!errors[key]) errors[key] = issue.message
+        }
+        setFieldErrors(errors)
+        return
+      }
+      try {
+        await updateCard.mutateAsync({ id: card!.id, data: { name: result.data.name, exampleSentence: result.data.exampleSentence, translation: result.data.translation, image: result.data.image } })
+        onClose()
+      } catch (err) {
+        setSubmitError(err instanceof Error ? err.message : 'Failed to update card.')
+      }
+    }
+  }
 
-    const inputClass =
-        "w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500";
-    const labelClass = "mb-1 block text-sm font-medium text-gray-700";
-    const errorClass = "mt-1 text-xs text-red-500";
+  const inp: React.CSSProperties = {
+    width: '100%', borderRadius: '8px', border: `1px solid ${th.borderInput}`,
+    background: th.surface, color: th.text,
+    padding: '9px 12px', fontSize: '0.875rem', fontFamily: 'inherit',
+    outline: 'none', boxSizing: 'border-box', transition: 'border-color 150ms, box-shadow 150ms',
+  }
+  const lbl: React.CSSProperties = {
+    display: 'block', fontSize: '0.78rem', fontWeight: 700, color: th.textSub,
+    marginBottom: '5px', letterSpacing: '0.3px', textTransform: 'uppercase',
+  }
+  const focFn = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = th.accent
+    e.target.style.boxShadow = `0 0 0 2px ${th.accent}33`
+  }
+  const blrFn = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    e.target.style.borderColor = th.borderInput
+    e.target.style.boxShadow = 'none'
+  }
 
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            onClick={onClose}
+  return (
+    <div
+      onClick={onClose}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: th.overlay, backdropFilter: 'blur(2px)' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="modal-enter"
+        style={{
+          position: 'relative', background: th.surface, borderRadius: '16px',
+          padding: '28px', width: '100%', maxWidth: '440px', margin: '0 16px',
+          boxShadow: th.modalShadow, border: `1px solid ${th.border}`,
+        }}
+      >
+        <button
+          type="button"
+          onClick={onClose}
+          style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: 'none', cursor: 'pointer', color: th.textMuted, fontSize: '16px', lineHeight: 1 }}
         >
-            <div
-                className="relative mx-4 w-full max-w-md rounded-xl bg-white p-6 shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                {/* Close button */}
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="absolute right-3 top-3 text-gray-400 hover:text-gray-600"
-                    aria-label="Close"
-                >
-                    ✕
-                </button>
+          ✕
+        </button>
+        <h2 style={{ margin: '0 0 22px', fontSize: '1.1rem', fontWeight: 800, color: th.text }}>
+          {mode === 'create' ? L.createCard : L.edit}
+        </h2>
 
-                <h2 className="mb-5 text-lg font-bold text-gray-800">
-                    {mode === "create" ? "Create Card" : "Edit Card"}
-                </h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={lbl}>{L.finnishWord}</label>
+            <input style={inp} value={name} onChange={e => setName(e.target.value)} placeholder="syödä" onFocus={focFn} onBlur={blrFn} />
+            {fieldErrors.name && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.name}</p>}
+          </div>
 
-                <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                    {/* Name */}
-                    <div>
-                        <label htmlFor="card-name" className={labelClass}>
-                            Finnish Word
-                        </label>
-                        <input
-                            id="card-name"
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className={inputClass}
-                            placeholder="e.g. syödä"
-                        />
-                        {fieldErrors.name && (
-                            <p className={errorClass}>{fieldErrors.name}</p>
-                        )}
-                    </div>
+          <div>
+            <label style={lbl}>{L.exSentence}</label>
+            <textarea style={{ ...inp, resize: 'vertical' } as React.CSSProperties} rows={2} value={exampleSentence} onChange={e => setExampleSentence(e.target.value)} placeholder="Minä syön aamiaista" onFocus={focFn} onBlur={blrFn} />
+            {fieldErrors.exampleSentence && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.exampleSentence}</p>}
+          </div>
 
-                    {/* Example Sentence */}
-                    <div>
-                        <label htmlFor="card-sentence" className={labelClass}>
-                            Example Sentence
-                        </label>
-                        <textarea
-                            id="card-sentence"
-                            value={exampleSentence}
-                            onChange={(e) => setExampleSentence(e.target.value)}
-                            className={`${inputClass} resize-none`}
-                            rows={3}
-                            placeholder="e.g. Minä syön aamiaista"
-                        />
-                        {fieldErrors.exampleSentence && (
-                            <p className={errorClass}>{fieldErrors.exampleSentence}</p>
-                        )}
-                    </div>
+          <div>
+            <label style={lbl}>{L.engTranslation}</label>
+            <input style={inp} value={translation} onChange={e => setTranslation(e.target.value)} placeholder="to eat" onFocus={focFn} onBlur={blrFn} />
+            {fieldErrors.translation && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.translation}</p>}
+          </div>
 
-                    {/* Translation */}
-                    <div>
-                        <label htmlFor="card-translation" className={labelClass}>
-                            English Translation
-                        </label>
-                        <input
-                            id="card-translation"
-                            type="text"
-                            value={translation}
-                            onChange={(e) => setTranslation(e.target.value)}
-                            className={inputClass}
-                            placeholder="e.g. to eat"
-                        />
-                        {fieldErrors.translation && (
-                            <p className={errorClass}>{fieldErrors.translation}</p>
-                        )}
-                    </div>
+          <div>
+            <label style={lbl}>Image{mode === 'edit' ? <span style={{ fontWeight: 400, opacity: 0.6, textTransform: 'none', letterSpacing: 0 }}> (optional)</span> : ''}</label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              onChange={e => setImageFile(e.target.files?.[0] ?? null)}
+              style={{ display: 'block', width: '100%', fontSize: '0.875rem', color: th.textSub }}
+            />
+            {fieldErrors.image && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.image}</p>}
+            {previewUrl && (
+              <div style={{ marginTop: '8px', borderRadius: '10px', overflow: 'hidden', height: '90px', border: `1px solid ${th.border}` }}>
+                <img src={previewUrl} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }} />
+              </div>
+            )}
+          </div>
 
-                    {/* Image */}
-                    <div>
-                        <label htmlFor="card-image" className={labelClass}>
-                            Image{mode === "edit" ? " (optional)" : ""}
-                        </label>
-                        <input
-                            id="card-image"
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/jpeg,image/png,image/gif,image/webp"
-                            onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                            className="block w-full text-sm text-gray-500 file:mr-3 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
-                        />
-                        {fieldErrors.image && (
-                            <p className={errorClass}>{fieldErrors.image}</p>
-                        )}
-                        {previewUrl && (
-                            <img
-                                src={previewUrl}
-                                alt="Preview"
-                                className="mt-2 max-h-40 rounded-lg object-contain"
-                            />
-                        )}
-                    </div>
+          {submitError && (
+            <div style={{ background: '#fef2f2', borderRadius: '8px', padding: '9px 12px', fontSize: '0.8rem', color: th.red }}>{submitError}</div>
+          )}
 
-                    {/* Submit error */}
-                    {submitError && (
-                        <p className="rounded-md bg-red-50 px-3 py-2 text-sm text-red-600">
-                            {submitError}
-                        </p>
-                    )}
-
-                    {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={isPending}
-                            className="rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                            {isPending
-                                ? "Saving..."
-                                : mode === "create"
-                                    ? "Create"
-                                    : "Save"}
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    );
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '4px' }}>
+            <button type="button" onClick={onClose} style={{ borderRadius: '8px', background: th.surfaceAlt, color: th.textSub, padding: '9px 18px', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+              {L.cancel}
+            </button>
+            <button type="submit" disabled={isPending} style={{ borderRadius: '8px', background: th.amber, color: '#2f3d56', padding: '9px 18px', fontSize: '0.875rem', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit', opacity: isPending ? 0.6 : 1 }}>
+              {isPending ? 'Saving…' : mode === 'create' ? L.create : L.save}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
 }

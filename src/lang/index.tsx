@@ -1,0 +1,78 @@
+import { createContext, useContext, useState, type ReactNode } from 'react'
+
+export const I18N = {
+  en: {
+    appName: 'Finnish Learning App',
+    chooseATopic: 'Choose a topic',
+    login: 'Log in', logout: 'Logout',
+    allTopics: '← All topics',
+    word: 'Word', sentence: 'Sentence',
+    searchByWord: 'Search by word…', searchBySentence: 'Search by sentence…',
+    noCardsFound: 'No cards found.', createCard: 'Create card',
+    edit: 'Edit', delete: 'Delete', cancel: 'Cancel', save: 'Save', create: 'Create',
+    tapToFlip: 'tap to flip', admin: 'Manage cards',
+    deleteConfirmMsg: 'Are you sure you want to delete this card? This action cannot be undone.',
+    prev: '← Prev', next: 'Next →',
+    finnishWord: 'Finnish word', exSentence: 'Example sentence', engTranslation: 'English translation',
+    username: 'Username', password: 'Password',
+    fillAllFields: 'Please fill in all fields.',
+    enterCreds: 'Please enter both username and password.',
+    manageCards: 'Card management', noCardsYet: 'No cards in this topic yet.',
+    allTopicsFilter: 'All topics', backToTopics: '← Back to topics',
+    cardOf: (a: number, b: number) => `${a} / ${b}`,
+  },
+  fi: {
+    appName: 'Suomen Oppiminen',
+    chooseATopic: 'Valitse aihe',
+    login: 'Kirjaudu', logout: 'Kirjaudu ulos',
+    allTopics: '← Kaikki aiheet',
+    word: 'Sana', sentence: 'Lause',
+    searchByWord: 'Hae sanalla…', searchBySentence: 'Hae lauseella…',
+    noCardsFound: 'Kortteja ei löydy.', createCard: 'Luo kortti',
+    edit: 'Muokkaa', delete: 'Poista', cancel: 'Peruuta', save: 'Tallenna', create: 'Luo',
+    tapToFlip: 'napauta kääntääksesi', admin: 'Hallitse kortteja',
+    deleteConfirmMsg: 'Haluatko varmasti poistaa tämän kortin? Toimintoa ei voi peruuttaa.',
+    prev: '← Edellinen', next: 'Seuraava →',
+    finnishWord: 'Suomenkielinen sana', exSentence: 'Esimerkkilause', engTranslation: 'Englanninkielinen käännös',
+    username: 'Käyttäjänimi', password: 'Salasana',
+    fillAllFields: 'Täytä kaikki kentät.',
+    enterCreds: 'Syötä käyttäjänimi ja salasana.',
+    manageCards: 'Korttien hallinta', noCardsYet: 'Tässä aiheessa ei ole vielä kortteja.',
+    allTopicsFilter: 'Kaikki aiheet', backToTopics: '← Takaisin aiheisiin',
+    cardOf: (a: number, b: number) => `${a} / ${b}`,
+  },
+}
+
+export type Lang = 'en' | 'fi'
+export type I18nStrings = typeof I18N.en
+
+interface LangContextType {
+  lang: Lang
+  L: I18nStrings
+  toggleLang: () => void
+}
+
+const LangContext = createContext<LangContextType>({ lang: 'en', L: I18N.en, toggleLang: () => {} })
+
+export function LangProvider({ children }: { children: ReactNode }) {
+  const [lang, setLang] = useState<Lang>(
+    () => (localStorage.getItem('lang') as Lang) || 'en',
+  )
+  const L = I18N[lang]
+
+  const toggleLang = () => {
+    setLang(prev => {
+      const next: Lang = prev === 'en' ? 'fi' : 'en'
+      localStorage.setItem('lang', next)
+      return next
+    })
+  }
+
+  return (
+    <LangContext.Provider value={{ lang, L, toggleLang }}>
+      {children}
+    </LangContext.Provider>
+  )
+}
+
+export const useLang = () => useContext(LangContext)

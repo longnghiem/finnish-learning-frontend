@@ -1,79 +1,61 @@
-import {useEffect} from "react";
+import { useEffect } from 'react'
+import { useTheme } from '../theme/index.tsx'
+import { useLang } from '../lang/index.tsx'
 
 interface ConfirmModalProps {
-    /** The message to display in the modal body. */
-    message: string;
-    /** Called when the user confirms the action. */
-    onConfirm: () => void;
-    /** Called when the user cancels (or dismisses) the modal. */
-    onCancel: () => void;
-    /** When true, the confirm button shows a loading state and is disabled. */
-    isLoading?: boolean;
+  message: string
+  onConfirm: () => void
+  onCancel: () => void
+  isLoading?: boolean
 }
 
-/**
- * A generic confirmation modal with Cancel and Confirm buttons.
- *
- * Reusable for any destructive or important action — not specific to
- * card deletion. Displays a message and two action buttons. The confirm
- * button shows a loading indicator when `isLoading` is true.
- *
- * Dismissible via the Escape key or clicking the backdrop.
- *
- */
-export function ConfirmModal({
- message,
- onConfirm,
- onCancel,
- isLoading = false,
-}: ConfirmModalProps) {
-    // --- Escape key ---
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onCancel();
-        };
-        document.addEventListener("keydown", handleKeyDown);
-        return () => document.removeEventListener("keydown", handleKeyDown);
-    }, [onCancel]);
+export function ConfirmModal({ message, onConfirm, onCancel, isLoading = false }: ConfirmModalProps) {
+  const { th } = useTheme()
+  const { L } = useLang()
 
-    // --- Prevent background scrolling ---
-    useEffect(() => {
-        document.body.style.overflow = "hidden";
-        return () => {
-            document.body.style.overflow = "";
-        };
-    }, []);
+  useEffect(() => {
+    const fn = (e: KeyboardEvent) => { if (e.key === 'Escape') onCancel() }
+    document.addEventListener('keydown', fn)
+    return () => document.removeEventListener('keydown', fn)
+  }, [onCancel])
 
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+  useEffect(() => {
+    document.body.style.overflow = 'hidden'
+    return () => { document.body.style.overflow = '' }
+  }, [])
+
+  return (
+    <div
+      onClick={onCancel}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: th.overlay, backdropFilter: 'blur(2px)' }}
+    >
+      <div
+        onClick={e => e.stopPropagation()}
+        className="modal-enter"
+        style={{ background: th.surface, borderRadius: '16px', padding: '28px', maxWidth: '380px', width: '100%', margin: '0 16px', boxShadow: th.modalShadow, border: `1px solid ${th.border}` }}
+      >
+        <p style={{ color: th.text, marginBottom: '24px', lineHeight: 1.7, fontSize: '0.95rem' }}>
+          {message}
+        </p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+          <button
+            type="button"
             onClick={onCancel}
-        >
-            <div
-                className="mx-4 w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <p className="mb-6 text-sm text-gray-700">{message}</p>
-
-                <div className="flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onCancel}
-                        disabled={isLoading}
-                        className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-300 disabled:opacity-50"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onConfirm}
-                        disabled={isLoading}
-                        className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:bg-red-600 disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {isLoading ? "Deleting..." : "Delete"}
-                    </button>
-                </div>
-            </div>
+            disabled={isLoading}
+            style={{ borderRadius: '8px', background: th.surfaceAlt, color: th.textSub, padding: '9px 18px', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit', opacity: isLoading ? 0.5 : 1 }}
+          >
+            {L.cancel}
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={isLoading}
+            style={{ borderRadius: '8px', background: th.red, color: 'white', padding: '9px 18px', fontSize: '0.875rem', fontWeight: 700, border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: isLoading ? 0.5 : 1 }}
+          >
+            {isLoading ? 'Deleting…' : L.delete}
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  )
 }
