@@ -1,8 +1,8 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthProvider.tsx'
-import { ThemeProvider, useTheme } from './theme/index.tsx'
-import { LangProvider } from './lang/index.tsx'
+import { ThemeProvider } from './theme'
+import { LangProvider } from './lang'
 import { Navbar } from './components/Navbar.tsx'
 import { LandingPage } from './pages/LandingPage.tsx'
 import { LoginPage } from './pages/LoginPage.tsx'
@@ -16,11 +16,10 @@ const queryClient = new QueryClient({
 })
 
 function AppInner() {
-  const { th } = useTheme()
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: th.bg, color: th.text, transition: 'background 300ms ease, color 300ms ease' }}>
+    <div className="min-h-screen flex flex-col bg-bg text-text-primary transition-[background,color] duration-300 ease-in-out">
       <Navbar />
-      <main style={{ flex: 1 }}>
+      <main className="flex-1">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />

@@ -3,9 +3,16 @@ import { useAuth } from '../auth/useAuth.ts'
 import { useTheme } from '../theme/index.tsx'
 import { useLang } from '../lang/index.tsx'
 
+const pillClassName = (active: boolean) =>
+  `rounded-lg px-4 py-[7px] text-[0.8rem] font-bold text-nav-text border cursor-pointer font-[inherit] transition-[background,border-color] duration-150 ${
+    active
+      ? 'bg-[rgba(255,189,89,0.22)] border-amber'
+      : 'bg-[rgba(255,255,255,0.08)] border-[rgba(255,255,255,0.12)]'
+  }`
+
 export function Navbar() {
   const { isLoggedIn, logout } = useAuth()
-  const { th, dark, toggleDark } = useTheme()
+  const { dark, toggleDark } = useTheme()
   const { lang, L, toggleLang } = useLang()
   const navigate = useNavigate()
   const location = useLocation()
@@ -17,73 +24,42 @@ export function Navbar() {
     navigate('/')
   }
 
-  const pillBtn = (active: boolean): React.CSSProperties => ({
-    borderRadius: '8px',
-    background: active ? 'rgba(255,189,89,0.22)' : 'rgba(255,255,255,0.08)',
-    color: th.navText,
-    padding: '7px 16px',
-    fontSize: '0.8rem',
-    fontWeight: 700,
-    border: `1px solid ${active ? th.amber : 'rgba(255,255,255,0.12)'}`,
-    cursor: 'pointer',
-    transition: 'background 150ms, border-color 150ms',
-    fontFamily: 'inherit',
-  })
-
   return (
-    <nav style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      background: th.navBg, padding: '14px 28px',
-      boxShadow: '0 2px 12px rgb(0 0 0/.2)',
-      position: 'sticky', top: 0, zIndex: 20,
-    }}>
-      <Link to="/" style={{
-        fontSize: '1.2rem', fontWeight: 800, color: th.navText,
-        textDecoration: 'none', letterSpacing: '-0.3px',
-      }}>
+    <nav className="flex items-center justify-between bg-nav-bg px-7 py-3.5 shadow-[0_2px_12px_rgb(0_0_0/0.2)] sticky top-0 z-20">
+      <Link to="/" className="text-[1.2rem] font-extrabold text-nav-text no-underline tracking-[-0.3px]">
         {L.appName}
       </Link>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="flex items-center gap-2">
         {/* Language toggle */}
-        <button onClick={toggleLang} style={pillBtn(false)} title="Toggle language">
+        <button onClick={toggleLang} className={pillClassName(false)} title="Toggle language">
           {lang === 'en' ? '🇫🇮 Suomi' : '🇬🇧 English'}
         </button>
 
         {/* Dark mode toggle */}
-        <button onClick={toggleDark} style={pillBtn(false)} title="Toggle dark mode">
+        <button onClick={toggleDark} className={pillClassName(false)} title="Toggle dark mode">
           {dark ? '☀️' : '🌙'}
         </button>
 
-        {/* Admin link */}
+        {/* Admin link - manage cards */}
         {isLoggedIn && (
-          <Link to="/admin" style={{ ...pillBtn(isAdmin), textDecoration: 'none', display: 'inline-block' }}>
+          <Link to="/admin" className={`${pillClassName(isAdmin)} no-underline inline-block`}>
             {L.admin}
           </Link>
         )}
 
         {/* Login / Logout */}
         {isLoggedIn ? (
-          <button onClick={handleLogout} style={{
-            borderRadius: '8px', background: th.red, color: 'white',
-            padding: '7px 16px', fontSize: '0.8rem', fontWeight: 700,
-            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
-            transition: 'background 150ms',
-          }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = th.redHover }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = th.red }}
+          <button
+            onClick={handleLogout}
+            className="rounded-lg bg-red text-white px-4 py-1.75 text-[0.8rem] font-bold border-none cursor-pointer font-[inherit] transition-colors duration-150 hover:bg-red-hover"
           >
             {L.logout}
           </button>
         ) : (
-          <Link to="/login" style={{
-            borderRadius: '8px', background: th.amber, color: '#2f3d56',
-            padding: '7px 16px', fontSize: '0.8rem', fontWeight: 700,
-            textDecoration: 'none', display: 'inline-block',
-            transition: 'background 150ms',
-          }}
-            onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = th.amberHover }}
-            onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = th.amber }}
+          <Link
+            to="/login"
+            className="rounded-lg bg-amber text-nav-btn-text px-4 py-1.75 text-[0.8rem] font-bold no-underline inline-block transition-colors duration-150 hover:bg-amber-hover"
           >
             {L.login}
           </Link>
