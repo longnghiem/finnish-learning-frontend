@@ -1,74 +1,62 @@
-import { useState, useEffect } from 'react'
-import type { CardResponse } from '../types'
-import { getImageUrl } from '../api'
-import { useTheme } from '../theme/index.tsx'
-import { useLang } from '../lang/index.tsx'
+import {useState} from 'react'
+import type {CardResponse} from '../types'
+import {getImageUrl} from '../api'
+import {useLang} from '../lang'
 
 interface FlashcardProps {
   card: CardResponse
 }
 
+const overlayClasses = 'absolute bottom-0 left-0 right-0 bg-flash-overlay-bg backdrop-blur-[6px] px-5 pt-3.5 pb-[18px] ' +
+  'flex flex-col items-center gap-[5px]'
+
 export function Flashcard({ card }: FlashcardProps) {
-  const { th } = useTheme()
   const { L } = useLang()
   const [flipped, setFlipped] = useState(false)
+  const [prevCardId, setPrevCardId] = useState(card.id)
 
-  useEffect(() => { setFlipped(false) }, [card.id])
+  if (prevCardId !== card.id) {
+    setPrevCardId(card.id)
+    setFlipped(false)
+  }
 
   const imageUrl = getImageUrl(card.imageUrl)
 
-  const overlayBox: React.CSSProperties = {
-    position: 'absolute', bottom: 0, left: 0, right: 0,
-    background: 'rgba(180,180,180,0.52)',
-    backdropFilter: 'blur(6px)',
-    WebkitBackdropFilter: 'blur(6px)',
-    padding: '14px 20px 18px',
-    display: 'flex', flexDirection: 'column',
-    alignItems: 'center', gap: '5px',
-  }
-
   return (
     <div
-      className="flashcard-scene"
-      style={{ width: '100%', maxWidth: '300px', height: '460px', margin: '0 auto' }}
+      className="flashcard-scene w-full max-w-[300px] h-[460px] mx-auto"
       onClick={() => setFlipped(f => !f)}
     >
       <div className={`flashcard-inner${flipped ? ' flipped' : ''}`}>
         {/* Front */}
-        <div
-          className="flashcard-face"
-          style={{ border: `1px solid ${th.border}`, background: th.surfaceAlt, boxShadow: th.flashShadow }}
-        >
+        <div className="flashcard-face border border-border bg-surface-alt shadow-flash">
           <img
             src={imageUrl}
             alt={card.translation}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            className="w-full h-full object-cover object-top block"
           />
-          <div style={overlayBox}>
-            <p style={{ fontSize: '1.35rem', fontWeight: 800, color: '#1a2636', textAlign: 'center', margin: 0, lineHeight: 1.3, textShadow: '0 1px 2px rgba(255,255,255,0.3)' }}>
+          <div className={overlayClasses}>
+            <p className="text-[1.35rem] font-extrabold text-flash-front-text text-center m-0 leading-[1.3] [text-shadow:0_1px_2px_rgba(255,255,255,0.3)]">
               {card.translation}
             </p>
-            <p style={{ fontSize: '0.68rem', color: '#3a4a5a', margin: 0, letterSpacing: '0.6px', fontWeight: 600, textTransform: 'uppercase' }}>
+            <p className="text-[0.68rem] text-flash-front-hint m-0 tracking-[0.6px] font-semibold uppercase">
               {L.tapToFlip}
             </p>
           </div>
         </div>
 
         {/* Back */}
-        <div
-          className="flashcard-face back"
-          style={{ border: `2px solid ${th.accent}`, background: th.surfaceAlt, boxShadow: th.flashShadow }}
-        >
+        <div className="flashcard-face back border-2 border-accent bg-surface-alt shadow-flash">
           <img
             src={imageUrl}
             alt={card.name}
-            style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top', display: 'block' }}
+            className="w-full h-full object-cover object-top block"
           />
-          <div style={overlayBox}>
-            <p style={{ fontSize: '1.55rem', fontWeight: 800, color: '#2f3d56', textAlign: 'center', margin: 0, lineHeight: 1.2 }}>
+          <div className={overlayClasses}>
+            <p className="text-[1.55rem] font-extrabold text-flash-back-title text-center m-0 leading-[1.2]">
               {card.name}
             </p>
-            <p style={{ fontSize: '0.82rem', fontStyle: 'italic', color: '#2a3a4a', textAlign: 'center', margin: 0, lineHeight: 1.65 }}>
+            <p className="text-[0.82rem] italic text-flash-back-text text-center m-0 leading-[1.65]">
               {card.exampleSentence}
             </p>
           </div>

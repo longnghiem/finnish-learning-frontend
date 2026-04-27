@@ -1,6 +1,5 @@
-import { useEffect } from 'react'
-import { useTheme } from '../theme/index.tsx'
-import { useLang } from '../lang/index.tsx'
+import {useEffect} from 'react'
+import {useLang} from '../lang'
 
 interface ConfirmModalProps {
   message: string
@@ -10,7 +9,6 @@ interface ConfirmModalProps {
 }
 
 export function ConfirmModal({ message, onConfirm, onCancel, isLoading = false }: ConfirmModalProps) {
-  const { th } = useTheme()
   const { L } = useLang()
 
   useEffect(() => {
@@ -27,22 +25,21 @@ export function ConfirmModal({ message, onConfirm, onCancel, isLoading = false }
   return (
     <div
       onClick={onCancel}
-      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: th.overlay, backdropFilter: 'blur(2px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px]"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="modal-enter"
-        style={{ background: th.surface, borderRadius: '16px', padding: '28px', maxWidth: '380px', width: '100%', margin: '0 16px', boxShadow: th.modalShadow, border: `1px solid ${th.border}` }}
+        className="modal-enter bg-surface rounded-2xl p-7 max-w-95 w-full mx-4 shadow-modal border border-border"
       >
-        <p style={{ color: th.text, marginBottom: '24px', lineHeight: 1.7, fontSize: '0.95rem' }}>
+        <p className="text-text-primary mb-6 leading-[1.7] text-[0.95rem]">
           {message}
         </p>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+        <div className="flex justify-end gap-2.5">
           <button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            style={{ borderRadius: '8px', background: th.surfaceAlt, color: th.textSub, padding: '9px 18px', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit', opacity: isLoading ? 0.5 : 1 }}
+            className={`rounded-lg bg-surface-alt text-text-sub px-4.5 py-2.25 text-sm font-semibold border-none cursor-pointer font-[inherit] ${isLoading ? 'opacity-50' : ''}`}
           >
             {L.cancel}
           </button>
@@ -50,7 +47,7 @@ export function ConfirmModal({ message, onConfirm, onCancel, isLoading = false }
             type="button"
             onClick={onConfirm}
             disabled={isLoading}
-            style={{ borderRadius: '8px', background: th.red, color: 'white', padding: '9px 18px', fontSize: '0.875rem', fontWeight: 700, border: 'none', cursor: isLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: isLoading ? 0.5 : 1 }}
+            className={`rounded-lg bg-red text-white px-4.5 py-2.25 text-sm font-bold border-none font-[inherit] ${isLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
           >
             {isLoading ? 'Deleting…' : L.delete}
           </button>

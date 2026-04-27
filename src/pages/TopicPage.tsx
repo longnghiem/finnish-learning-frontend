@@ -1,15 +1,21 @@
-import { useParams, useNavigate } from 'react-router-dom'
-import { useAuth } from '../auth/useAuth.ts'
-import { useCards, useDeleteCard, useTopics } from '../hooks'
-import { useEffect, useState } from 'react'
-import type { SearchType } from '../types'
-import { ProgressDots } from '../components/ProgressDots.tsx'
-import { SearchBar } from '../components/SearchBar.tsx'
-import { Flashcard } from '../components/Flashcard.tsx'
-import { CardModal } from '../components/CardModal.tsx'
-import { ConfirmModal } from '../components/ConfirmModal.tsx'
-import { useTheme } from '../theme/index.tsx'
-import { useLang } from '../lang/index.tsx'
+import {useNavigate, useParams} from 'react-router-dom'
+import {useAuth} from '../auth/useAuth.ts'
+import {useCards, useDeleteCard, useTopics} from '../hooks'
+import {useEffect, useState} from 'react'
+import type {SearchType} from '../types'
+import {ProgressDots} from '../components/ProgressDots.tsx'
+import {SearchBar} from '../components/SearchBar.tsx'
+import {Flashcard} from '../components/Flashcard.tsx'
+import {CardModal} from '../components/CardModal.tsx'
+import {ConfirmModal} from '../components/ConfirmModal.tsx'
+import {useLang} from '../lang'
+
+const navBtnClasses = (disabled: boolean) =>
+  `rounded-lg px-[18px] py-2 text-sm font-semibold font-[inherit] transition-colors duration-150 ${
+    disabled
+      ? 'bg-transparent text-text-muted border border-transparent cursor-not-allowed opacity-35'
+      : 'bg-surface-alt text-text-primary border border-border cursor-pointer'
+  }`
 
 export function TopicPage() {
   const { topicId } = useParams<{ topicId: string }>()
@@ -17,7 +23,6 @@ export function TopicPage() {
   const navigate = useNavigate()
 
   const { isLoggedIn } = useAuth()
-  const { th } = useTheme()
   const { L } = useLang()
   const { data: topics } = useTopics()
   const topicName = topics?.find(t => t.id === numericTopicId)?.name ?? `Topic ${topicId}`
@@ -55,39 +60,29 @@ export function TopicPage() {
 
   const deleteCard = useDeleteCard()
 
-  const navBtn = (disabled: boolean): React.CSSProperties => ({
-    borderRadius: '8px',
-    background: disabled ? 'transparent' : th.surfaceAlt,
-    color: disabled ? th.textMuted : th.text,
-    padding: '8px 18px', fontSize: '0.875rem', fontWeight: 600,
-    border: `1px solid ${disabled ? 'transparent' : th.border}`,
-    cursor: disabled ? 'not-allowed' : 'pointer', fontFamily: 'inherit',
-    opacity: disabled ? 0.35 : 1, transition: 'background 150ms',
-  })
-
   const flashcardArea = isLoading ? (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
-      <p style={{ fontSize: '1.1rem', color: th.textMuted }}>Loading cards…</p>
+    <div className="flex items-center justify-center py-20">
+      <p className="text-[1.1rem] text-text-muted">Loading cards…</p>
     </div>
   ) : isError ? (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '80px 0' }}>
-      <p style={{ fontSize: '1.1rem', color: th.red }}>Failed to load cards.</p>
+    <div className="flex items-center justify-center py-20">
+      <p className="text-[1.1rem] text-red">Failed to load cards.</p>
     </div>
   ) : total === 0 ? (
-    <div style={{ textAlign: 'center', padding: '72px 0', color: th.textMuted, fontSize: '1rem', fontWeight: 600 }}>
+    <div className="text-center py-[72px] text-text-muted text-base font-semibold">
       {L.noCardsFound}
     </div>
   ) : (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '24px' }}>
+    <div className="flex flex-col items-center gap-6">
       {currentCard && <Flashcard key={currentCard.id} card={currentCard} />}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-        <button style={navBtn(!canGoPrev)} disabled={!canGoPrev} onClick={() => setCurrentIndex(i => i - 1)}>
+      <div className="flex items-center gap-4">
+        <button className={navBtnClasses(!canGoPrev)} disabled={!canGoPrev} onClick={() => setCurrentIndex(i => i - 1)}>
           {L.prev}
         </button>
-        <span style={{ fontSize: '0.8rem', color: th.textMuted, fontWeight: 600, minWidth: '52px', textAlign: 'center' }}>
+        <span className="text-[0.8rem] text-text-muted font-semibold min-w-[52px] text-center">
           {L.cardOf(currentIndex + 1, total)}
         </span>
-        <button style={navBtn(!canGoNext)} disabled={!canGoNext} onClick={() => setCurrentIndex(i => i + 1)}>
+        <button className={navBtnClasses(!canGoNext)} disabled={!canGoNext} onClick={() => setCurrentIndex(i => i + 1)}>
           {L.next}
         </button>
       </div>
@@ -96,19 +91,19 @@ export function TopicPage() {
   )
 
   return (
-    <div className="page-enter" style={{ maxWidth: '680px', margin: '0 auto', padding: '40px 24px 64px' }}>
+    <div className="page-enter max-w-[680px] mx-auto px-6 pt-10 pb-16">
       <button
         onClick={() => navigate('/')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', color: th.textMuted, fontSize: '0.875rem', fontFamily: 'inherit', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '4px', padding: 0, fontWeight: 600 }}
+        className="bg-transparent border-none cursor-pointer text-text-muted text-sm font-[inherit] mb-4 flex items-center gap-1 p-0 font-semibold"
       >
         {L.allTopics}
       </button>
 
-      <h1 style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 800, color: th.text, marginBottom: '28px' }}>
+      <h1 className="text-center text-2xl font-extrabold text-text-primary mb-7">
         {topicName}
       </h1>
 
-      <div style={{ marginBottom: '28px' }}>
+      <div className="mb-7">
         <SearchBar
           searchType={searchType}
           searchTerm={searchTerm}
@@ -120,13 +115,12 @@ export function TopicPage() {
       {flashcardArea}
 
       {isLoggedIn && (
-        <div style={{ marginTop: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div className="mt-9 flex items-center justify-center gap-2.5 flex-wrap">
           <button
             type="button"
             onClick={() => setModalMode('create')}
-            style={{ borderRadius: '8px', background: th.green, color: 'white', padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 150ms' }}
-            onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = th.greenHover }}
-            onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = th.green }}
+            className="rounded-lg bg-green text-white px-5 py-[9px] text-[0.85rem] font-bold border-none cursor-pointer
+            font-[inherit] transition-colors duration-150 hover:bg-green-hover"
           >
             {L.createCard}
           </button>
@@ -135,18 +129,16 @@ export function TopicPage() {
               <button
                 type="button"
                 onClick={() => setModalMode('edit')}
-                style={{ borderRadius: '8px', background: '#eab308', color: 'white', padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 150ms' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = '#ca8a04' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = '#eab308' }}
+                className="rounded-lg bg-yellow text-white px-5 py-[9px] text-[0.85rem] font-bold border-none cursor-pointer
+                font-[inherit] transition-colors duration-150 hover:bg-yellow-hover"
               >
                 {L.edit}
               </button>
               <button
                 type="button"
                 onClick={() => setShowDeleteConfirm(true)}
-                style={{ borderRadius: '8px', background: th.red, color: 'white', padding: '9px 20px', fontSize: '0.85rem', fontWeight: 700, border: 'none', cursor: 'pointer', fontFamily: 'inherit', transition: 'background 150ms' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLButtonElement).style.background = th.redHover }}
-                onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.background = th.red }}
+                className="rounded-lg bg-red text-white px-5 py-[9px] text-[0.85rem] font-bold border-none cursor-pointer
+                font-[inherit] transition-colors duration-150 hover:bg-red-hover"
               >
                 {L.delete}
               </button>

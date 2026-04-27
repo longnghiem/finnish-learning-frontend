@@ -1,10 +1,9 @@
-import type { CardResponse } from '../types'
-import { useCreateCard, useUpdateCard } from '../hooks'
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { getImageUrl } from '../api'
-import { createCardSchema, editCardSchema } from '../schemas'
-import { useTheme } from '../theme/index.tsx'
-import { useLang } from '../lang/index.tsx'
+import type {CardResponse} from '../types'
+import {useCreateCard, useUpdateCard} from '../hooks'
+import {useEffect, useMemo, useRef, useState} from 'react'
+import {getImageUrl} from '../api'
+import {createCardSchema, editCardSchema} from '../schemas'
+import {useLang} from '../lang'
 
 interface CardModalProps {
   mode: 'create' | 'edit'
@@ -13,8 +12,12 @@ interface CardModalProps {
   onClose: () => void
 }
 
+const inputClasses = 'w-full rounded-lg border border-border-input bg-surface text-text-primary px-3 py-[9px] text-sm font-[inherit]' +
+  ' outline-none transition-[border-color,box-shadow] duration-150 focus:border-accent focus:ring-2 focus:ring-accent/20'
+
+const labelClasses = 'block text-[0.78rem] font-bold text-text-sub mb-[5px] tracking-[0.3px] uppercase'
+
 export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
-  const { th } = useTheme()
   const { L } = useLang()
   const createCard = useCreateCard()
   const updateCard = useUpdateCard()
@@ -93,111 +96,83 @@ export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
     }
   }
 
-  const inp: React.CSSProperties = {
-    width: '100%', borderRadius: '8px', border: `1px solid ${th.borderInput}`,
-    background: th.surface, color: th.text,
-    padding: '9px 12px', fontSize: '0.875rem', fontFamily: 'inherit',
-    outline: 'none', boxSizing: 'border-box', transition: 'border-color 150ms, box-shadow 150ms',
-  }
-  const lbl: React.CSSProperties = {
-    display: 'block', fontSize: '0.78rem', fontWeight: 700, color: th.textSub,
-    marginBottom: '5px', letterSpacing: '0.3px', textTransform: 'uppercase',
-  }
-  const focFn = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    e.target.style.borderColor = th.accent
-    e.target.style.boxShadow = `0 0 0 2px ${th.accent}33`
-  }
-  const blrFn = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    e.target.style.borderColor = th.borderInput
-    e.target.style.boxShadow = 'none'
-  }
-
   return (
     <div
       onClick={onClose}
-      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: th.overlay, backdropFilter: 'blur(2px)' }}
+      className="fixed inset-0 z-50 flex items-center justify-center bg-overlay backdrop-blur-[2px]"
     >
       <div
         onClick={e => e.stopPropagation()}
-        className="modal-enter"
-        style={{
-          position: 'relative', background: th.surface, borderRadius: '16px',
-          padding: '28px', width: '100%', maxWidth: '440px', margin: '0 16px',
-          boxShadow: th.modalShadow, border: `1px solid ${th.border}`,
-        }}
+        className="modal-enter relative bg-surface rounded-2xl p-7 w-full max-w-[440px] mx-4 shadow-modal border border-border"
       >
         <button
           type="button"
           onClick={onClose}
-          style={{ position: 'absolute', top: '14px', right: '14px', background: 'none', border: 'none', cursor: 'pointer', color: th.textMuted, fontSize: '16px', lineHeight: 1 }}
+          className="absolute top-3.5 right-3.5 bg-transparent border-none cursor-pointer text-text-muted text-base leading-none"
         >
           ✕
         </button>
-        <h2 style={{ margin: '0 0 22px', fontSize: '1.1rem', fontWeight: 800, color: th.text }}>
+        <h2 className="m-0 mb-[22px] text-[1.1rem] font-extrabold text-text-primary">
           {mode === 'create' ? L.createCard : L.edit}
         </h2>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label style={lbl}>{L.finnishWord}</label>
-            <input style={inp} value={name} onChange={e => setName(e.target.value)} placeholder="syödä" onFocus={focFn} onBlur={blrFn} />
-            {fieldErrors.name && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.name}</p>}
+            <label className={labelClasses}>{L.finnishWord}</label>
+            <input className={inputClasses} value={name} onChange={e => setName(e.target.value)} placeholder="syödä" />
+            {fieldErrors.name && <p className="mt-1 text-xs text-red">{fieldErrors.name}</p>}
           </div>
 
           <div>
-            <label style={lbl}>{L.exSentence}</label>
-            <textarea style={{ ...inp, resize: 'vertical' } as React.CSSProperties} rows={2} value={exampleSentence} onChange={e => setExampleSentence(e.target.value)} placeholder="Minä syön aamiaista" onFocus={focFn} onBlur={blrFn} />
-            {fieldErrors.exampleSentence && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.exampleSentence}</p>}
+            <label className={labelClasses}>{L.exSentence}</label>
+            <textarea className={`${inputClasses} resize-y`} rows={2} value={exampleSentence} onChange={e => setExampleSentence(e.target.value)} placeholder="Minä syön aamiaista" />
+            {fieldErrors.exampleSentence && <p className="mt-1 text-xs text-red">{fieldErrors.exampleSentence}</p>}
           </div>
 
           <div>
-            <label style={lbl}>{L.engTranslation}</label>
-            <input style={inp} value={translation} onChange={e => setTranslation(e.target.value)} placeholder="to eat" onFocus={focFn} onBlur={blrFn} />
-            {fieldErrors.translation && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.translation}</p>}
+            <label className={labelClasses}>{L.engTranslation}</label>
+            <input className={inputClasses} value={translation} onChange={e => setTranslation(e.target.value)} placeholder="to eat" />
+            {fieldErrors.translation && <p className="mt-1 text-xs text-red">{fieldErrors.translation}</p>}
           </div>
 
           <div>
-            <label style={lbl}>Image{mode === 'edit' ? <span style={{ fontWeight: 400, opacity: 0.6, textTransform: 'none', letterSpacing: 0 }}> (optional)</span> : ''}</label>
+            <label className={labelClasses}>
+              Image{mode === 'edit' ? <span className="font-normal opacity-60 normal-case tracking-normal"> (optional)</span> : ''}
+            </label>
             {/* Hidden native file input */}
             <input
               ref={fileInputRef}
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
               onChange={e => setImageFile(e.target.files?.[0] ?? null)}
-              style={{ display: 'none' }}
+              className="hidden"
             />
             {/* Styled trigger button */}
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                borderRadius: '8px', border: `1px dashed ${th.borderInput}`,
-                background: th.surfaceAlt, color: th.textSub,
-                padding: '9px 14px', fontSize: '0.875rem', fontWeight: 600,
-                cursor: 'pointer', fontFamily: 'inherit', width: '100%',
-              }}
+              className="flex items-center gap-2 rounded-lg border border-dashed border-border-input bg-surface-alt text-text-sub px-3.5 py-[9px] text-sm font-semibold cursor-pointer font-[inherit] w-full"
             >
-              <span style={{ fontSize: '1rem' }}>📎</span>
+              <span className="text-base">📎</span>
               {imageFile ? imageFile.name : 'Choose image…'}
             </button>
-            {fieldErrors.image && <p style={{ marginTop: '4px', fontSize: '0.75rem', color: th.red }}>{fieldErrors.image}</p>}
+            {fieldErrors.image && <p className="mt-1 text-xs text-red">{fieldErrors.image}</p>}
             {previewUrl && (
-              <div style={{ marginTop: '10px', borderRadius: '10px', overflow: 'hidden', border: `1px solid ${th.border}`, background: th.surface, display: 'flex', justifyContent: 'center' }}>
-                <img src={previewUrl} alt="preview" style={{ display: 'block', width: 'auto', height: 'auto', maxWidth: '100%', maxHeight: '360px' }} />
+              <div className="mt-2.5 rounded-[10px] overflow-hidden border border-border bg-surface flex justify-center">
+                <img src={previewUrl} alt="preview" className="block w-auto h-auto max-w-full max-h-[360px]" />
               </div>
             )}
           </div>
 
           {submitError && (
-            <div style={{ background: '#fef2f2', borderRadius: '8px', padding: '9px 12px', fontSize: '0.8rem', color: th.red }}>{submitError}</div>
+            <div className="bg-error-bg rounded-lg px-3 py-[9px] text-[0.8rem] text-red">{submitError}</div>
           )}
 
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '4px' }}>
-            <button type="button" onClick={onClose} style={{ borderRadius: '8px', background: th.surfaceAlt, color: th.textSub, padding: '9px 18px', fontSize: '0.875rem', fontWeight: 600, border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+          <div className="flex justify-end gap-2.5 pt-1">
+            <button type="button" onClick={onClose} className="rounded-lg bg-surface-alt text-text-sub px-[18px] py-[9px] text-sm font-semibold border-none cursor-pointer font-[inherit]">
               {L.cancel}
             </button>
-            <button type="submit" disabled={isPending} style={{ borderRadius: '8px', background: th.amber, color: '#2f3d56', padding: '9px 18px', fontSize: '0.875rem', fontWeight: 800, border: 'none', cursor: 'pointer', fontFamily: 'inherit', opacity: isPending ? 0.6 : 1 }}>
+            <button type="submit" disabled={isPending} className={`rounded-lg bg-amber text-nav-btn-text px-[18px] py-[9px] text-sm font-extrabold border-none cursor-pointer font-[inherit] ${isPending ? 'opacity-60' : ''}`}>
               {isPending ? 'Saving…' : mode === 'create' ? L.create : L.save}
             </button>
           </div>
