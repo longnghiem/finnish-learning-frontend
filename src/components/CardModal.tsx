@@ -67,7 +67,13 @@ export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
         return
       }
       try {
-        await createCard.mutateAsync({ name: result.data.name, exampleSentence: result.data.exampleSentence, translation: result.data.translation, topicId, image: result.data.image })
+        await createCard.mutateAsync({
+          name: result.data.name,
+          exampleSentence: result.data.exampleSentence,
+          translation: result.data.translation,
+          topicId,
+          image: result.data.image
+        })
         onClose()
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : 'Failed to create card.')
@@ -84,7 +90,15 @@ export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
         return
       }
       try {
-        await updateCard.mutateAsync({ id: card!.id, data: { name: result.data.name, exampleSentence: result.data.exampleSentence, translation: result.data.translation, image: result.data.image } })
+        await updateCard.mutateAsync({
+          id: card!.id,
+          data: {
+            name: result.data.name,
+            exampleSentence: result.data.exampleSentence,
+            translation: result.data.translation,
+            image: result.data.image
+          }
+        })
         onClose()
       } catch (err) {
         setSubmitError(err instanceof Error ? err.message : 'Failed to update card.')
