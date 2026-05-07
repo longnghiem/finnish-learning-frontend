@@ -23,7 +23,7 @@ export function TopicPage() {
   const numericTopicId = Number(topicId)
   const navigate = useNavigate()
 
-  const { isLoggedIn } = useAuth()
+  const { isLoggedIn, isAdmin } = useAuth()
   const { L } = useLang()
   const { data: topics } = useTopics()
   const topicName = topics?.find(t => t.id === numericTopicId)?.name ?? `Topic ${topicId}`
@@ -128,7 +128,7 @@ export function TopicPage() {
         </div>
       )}
 
-      {isLoggedIn && (
+      {isAdmin && (
         <div className="mt-9 flex items-center justify-center gap-2.5 flex-wrap">
           <button
             type="button"
