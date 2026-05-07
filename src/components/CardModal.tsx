@@ -4,7 +4,7 @@ import {useEffect, useMemo, useRef, useState, type SubmitEvent} from 'react'
 import {getImageUrl} from '../api'
 import {createCardSchema, editCardSchema} from '../schemas'
 import {useLang} from '../lang'
-import {inputClasses, labelClasses} from '../styles'
+import {inputCls, labelCls} from '../styles'
 
 interface CardModalProps {
   mode: 'create' | 'edit'
@@ -128,25 +128,25 @@ export function CardModal({ mode, topicId, card, onClose }: CardModalProps) {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className={labelClasses}>{L.finnishWord}</label>
-            <input className={inputClasses} value={name} onChange={e => setName(e.target.value)} placeholder="syödä" />
+            <label className={labelCls}>{L.finnishWord}</label>
+            <input className={inputCls} value={name} onChange={e => setName(e.target.value)} placeholder="syödä" />
             {fieldErrors.name && <p className="mt-1 text-xs text-red">{fieldErrors.name}</p>}
           </div>
 
           <div>
-            <label className={labelClasses}>{L.exSentence}</label>
-            <textarea className={`${inputClasses} resize-y`} rows={2} value={exampleSentence} onChange={e => setExampleSentence(e.target.value)} placeholder="Minä syön aamiaista" />
+            <label className={labelCls}>{L.exSentence}</label>
+            <textarea className={`${inputCls} resize-y`} rows={2} value={exampleSentence} onChange={e => setExampleSentence(e.target.value)} placeholder="Minä syön aamiaista" />
             {fieldErrors.exampleSentence && <p className="mt-1 text-xs text-red">{fieldErrors.exampleSentence}</p>}
           </div>
 
           <div>
-            <label className={labelClasses}>{L.engTranslation}</label>
-            <input className={inputClasses} value={translation} onChange={e => setTranslation(e.target.value)} placeholder="to eat" />
+            <label className={labelCls}>{L.engTranslation}</label>
+            <input className={inputCls} value={translation} onChange={e => setTranslation(e.target.value)} placeholder="to eat" />
             {fieldErrors.translation && <p className="mt-1 text-xs text-red">{fieldErrors.translation}</p>}
           </div>
 
           <div>
-            <label className={labelClasses}>
+            <label className={labelCls}>
               Image{mode === 'edit' ? <span className="font-normal opacity-60 normal-case tracking-normal"> (optional)</span> : ''}
             </label>
             {/* Hidden native file input */}

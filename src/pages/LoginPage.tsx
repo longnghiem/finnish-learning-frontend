@@ -2,7 +2,7 @@ import {useAuth} from '../auth/useAuth.ts'
 import {Link, useNavigate} from 'react-router-dom'
 import {useEffect, useState, type SubmitEvent} from 'react'
 import {useLang} from '../lang'
-import {inputClasses, labelClasses, submitButtonClasses} from '../styles'
+import {inputCls, labelCls, submitButtonCls} from '../styles'
 import {loginUser} from "../api";
 
 export function LoginPage() {
@@ -47,23 +47,23 @@ export function LoginPage() {
         </h1>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4.5">
           <div>
-            <label className={labelClasses}>{L.username}</label>
+            <label className={labelCls}>{L.username}</label>
             <input
               type="text"
               value={username}
               onChange={e => { setUsername(e.target.value); setError(null) }}
-              className={inputClasses}
+              className={inputCls}
               placeholder={L.username}
               autoComplete="username"
             />
           </div>
           <div>
-            <label className={labelClasses}>{L.password}</label>
+            <label className={labelCls}>{L.password}</label>
             <input
               type="password"
               value={password}
               onChange={e => { setPassword(e.target.value); setError(null) }}
-              className={inputClasses}
+              className={inputCls}
               placeholder={L.password}
               autoComplete="current-password"
             />
@@ -76,7 +76,7 @@ export function LoginPage() {
           <button
             type="submit"
             disabled={submitting}
-            className={submitButtonClasses}
+            className={submitButtonCls}
           >
             {L.login}
           </button>

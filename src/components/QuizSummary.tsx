@@ -1,7 +1,7 @@
 import {useLang} from "../lang";
 import {useNavigate} from "react-router-dom";
 
-interface QuizAnswerLog {
+export interface QuizAnswerLog {
   quality: number
   correct: boolean
 }

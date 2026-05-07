@@ -3,11 +3,11 @@ import type {CardResponse} from '../types'
 import {getImageUrl} from '../api'
 import {useLang} from '../lang'
 import {
-  backCardWrapperClasses, cardExampleClasses, cardImgClasses, cardNameClasses,
-  cardOverlayClasses,
-  cardTranslationClasses, cardWrapperClasses,
-  flipPromptClasses,
-  frontCardWrapperClasses
+  backCardWrapperCls, cardExampleCls, cardImgCls, cardNameCls,
+  cardOverlayCls,
+  cardTranslationCls, cardWrapperCls,
+  flipPromptCls,
+  frontCardWrapperCls
 } from "../styles.ts";
 
 interface FlashcardProps {
@@ -28,39 +28,39 @@ export function Flashcard({ card }: FlashcardProps) {
 
   return (
     <div
-      className={cardWrapperClasses}
+      className={cardWrapperCls}
       onClick={() => setFlipped(f => !f)}
     >
       <div className={`flashcard-inner${flipped ? ' flipped' : ''}`}>
         {/* Front */}
-        <div className={frontCardWrapperClasses}>
+        <div className={frontCardWrapperCls}>
           <img
             src={imageUrl}
             alt={card.translation}
-            className={cardImgClasses}
+            className={cardImgCls}
           />
-          <div className={cardOverlayClasses}>
-            <p className={cardTranslationClasses}>
+          <div className={cardOverlayCls}>
+            <p className={cardTranslationCls}>
               {card.translation}
             </p>
-            <p className={flipPromptClasses}>
+            <p className={flipPromptCls}>
               {L.tapToFlip}
             </p>
           </div>
         </div>
 
         {/* Back */}
-        <div className={backCardWrapperClasses}>
+        <div className={backCardWrapperCls}>
           <img
             src={imageUrl}
             alt={card.name}
-            className={cardImgClasses}
+            className={cardImgCls}
           />
-          <div className={cardOverlayClasses}>
-            <p className={cardNameClasses}>
+          <div className={cardOverlayCls}>
+            <p className={cardNameCls}>
               {card.name}
             </p>
-            <p className={cardExampleClasses}>
+            <p className={cardExampleCls}>
               {card.exampleSentence}
             </p>
           </div>

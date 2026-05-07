@@ -10,3 +10,5 @@ export {
 export type { FetchCardsParams, CreateCardData, UpdateCardData } from './cards'
 export { registerUser, loginUser } from './auth'
 export type { AuthResponse } from './auth'
+export { fetchQuizCards, submitAnswer } from './quiz'
+export type { QuizCard, SubmitAnswerResponse } from './quiz'

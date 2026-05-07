@@ -1,11 +1,11 @@
 import type {QuizCard} from "../api/quiz.ts";
 import {
-  backCardWrapperClasses, cardExampleClasses, cardImgClasses, cardNameClasses,
-  cardOverlayClasses,
-  cardTranslationClasses, cardWrapperClasses,
-  flipPromptClasses,
-  frontCardWrapperClasses,
-  newBadgeClasses
+  backCardWrapperCls, cardExampleCls, cardImgCls, cardNameCls,
+  cardOverlayCls,
+  cardTranslationCls, cardWrapperCls,
+  flipPromptCls,
+  frontCardWrapperCls,
+  newBadgeCls
 } from "../styles.ts";
 import {useLang} from "../lang";
 import {getImageUrl} from "../api";
@@ -36,47 +36,47 @@ export function QuizFlashcard({ card, flipped, onFlip }: QuizFlashcardProps) {
 
   return (
     <div
-      className={`${cardWrapperClasses} relative`}
+      className={`${cardWrapperCls} relative`}
       onClick={onFlip}
     >
       {card.isNew && (
-        <span className={newBadgeClasses}>
+        <span className={newBadgeCls}>
           {L.newCard}
         </span>
       )}
       <div className={`flashcard-inner${flipped ? ' flipped' : ''}`}>
         {/* Front — English translation + prompt */}
-        <div className={frontCardWrapperClasses}>
+        <div className={frontCardWrapperCls}>
           <img
             src={imageUrl}
             alt={card.translation}
-            className={cardImgClasses}
+            className={cardImgCls}
           />
-          <div className={cardOverlayClasses}>
-            <p className={cardTranslationClasses}>
+          <div className={cardOverlayCls}>
+            <p className={cardTranslationCls}>
               {card.translation}
             </p>
             <p className="text-[0.78rem] font-semibold text-flash-front-text text-center m-0 mt-1">
               {L.whatsTheFinnishWord}
             </p>
-            <p className={flipPromptClasses}>
+            <p className={flipPromptCls}>
               {L.tapToFlip}
             </p>
           </div>
         </div>
 
         {/* Back — Finnish word + example sentence */}
-        <div className={backCardWrapperClasses}>
+        <div className={backCardWrapperCls}>
           <img
             src={imageUrl}
             alt={card.name}
-            className={cardImgClasses}
+            className={cardImgCls}
           />
-          <div className={cardOverlayClasses}>
-            <p className={cardNameClasses}>
+          <div className={cardOverlayCls}>
+            <p className={cardNameCls}>
               {card.name}
             </p>
-            <p className={cardExampleClasses}>
+            <p className={cardExampleCls}>
               {card.exampleSentence}
             </p>
           </div>
