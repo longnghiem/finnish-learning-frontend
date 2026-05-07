@@ -9,7 +9,7 @@ import {type QuizAnswerLog, QuizSummary} from "../components/QuizSummary.tsx";
 import type {QuizCard} from "../api/quiz.ts";
 import {QuizFlashcard} from "../components/QuizFlashcard.tsx";
 import {GradeButtons} from "../components/GradeButton.tsx";
-import {ProgressDots} from "../components/ProgressDots.tsx";
+import {ProgressBar} from "../components/ProgressBar.tsx";
 
 /**
  * Quiz page: drives the user through a batch of due / new cards
@@ -143,7 +143,7 @@ export function QuizPage() {
           <span className="text-[0.8rem] text-text-muted font-semibold">
             {L.cardOf(cardIndex + 1, total)}
           </span>
-          <ProgressDots total={total} current={cardIndex} />
+          <ProgressBar total={total} current={cardIndex} />
         </div>
       )}
 

@@ -3,7 +3,7 @@ import {useAuth} from '../auth/useAuth.ts'
 import {useCards, useDeleteCard, useTopics} from '../hooks'
 import {useEffect, useState} from 'react'
 import type {SearchType} from '../types'
-import {ProgressDots} from '../components/ProgressDots.tsx'
+import {ProgressBar} from '../components/ProgressBar.tsx'
 import {SearchBar} from '../components/SearchBar.tsx'
 import {Flashcard} from '../components/Flashcard.tsx'
 import {CardModal} from '../components/CardModal.tsx'
@@ -87,7 +87,7 @@ export function TopicPage() {
           {L.next}
         </button>
       </div>
-      <ProgressDots total={total} current={currentIndex} />
+      <ProgressBar total={total} current={currentIndex} />
     </div>
   )
 
