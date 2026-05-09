@@ -42,6 +42,16 @@ export const I18N = {
     quizAgain: 'Quiz again',
     backToTopic: 'Back to topic',
     newCard: 'New',
+    // — Dashboard / progress —
+    progressTitle: 'Your Progress',
+    totalReviews: 'Total Reviews',
+    overallAccuracy: 'Overall Accuracy',
+    currentStreak: 'Current Streak',
+    bestStreak: 'Best Streak',
+    cardsDueToday: 'Cards Due Today',
+    learned: 'Learned',
+    due: 'due',
+    noProgressYet: 'No progress yet! Start a quiz to begin tracking your learning.',
   },
   fi: {
     appName: 'Suomen Oppiminen',
@@ -84,6 +94,16 @@ export const I18N = {
     quizAgain: 'Uusi tietovisa',
     backToTopic: 'Takaisin aiheeseen',
     newCard: 'Uusi',
+    // — Dashboard / progress —
+    progressTitle: 'Edistymisesi',
+    totalReviews: 'Arvostelut yhteensä',
+    overallAccuracy: 'Kokonaistarkkuus',
+    currentStreak: 'Nykyinen putki',
+    bestStreak: 'Paras putki',
+    cardsDueToday: 'Tänään tarkistettavat kortit',
+    learned: 'Opittu',
+    due: 'tarkistettavaa',
+    noProgressYet: 'Ei vielä edistystä! Aloita tietovisa seurataksesi oppimistasi.',
   },
 }
 
