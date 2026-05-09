@@ -94,5 +94,4 @@ src/
 ## To Do
 
 1. Fix card management page – Create card modal is missing topic selection
-2. Add app icon
-3. Token expiry handling
+2. Token expiry handling
