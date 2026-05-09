@@ -26,3 +26,21 @@ export const pageContainerCls = 'page-enter max-w-170 mx-auto px-6 pt-10 pb-16'
 export const backNavigationBtnCls = 'bg-transparent border-none cursor-pointer text-text-muted text-sm font-[inherit] mb-4 ' +
   'flex items-center gap-1 p-0 font-semibold'
 export const pageTitleCls = 'text-center text-2xl font-extrabold text-text-primary mb-7'
+
+// Dashboard (Linear-style: tight spacing, 1px borders, mono numerals, no shadows)
+export const dashPageCls = 'page-enter max-w-[1080px] mx-auto px-6 pt-9 pb-16'
+export const dashHeaderCls = 'flex items-end justify-between mb-7 flex-wrap gap-3.5'
+export const dashEyebrowCls = 'text-[11px] font-semibold text-text-muted tracking-[0.5px] uppercase m-0 mb-1.5'
+export const dashTitleCls = 'text-[1.55rem] font-bold text-text-primary m-0 tracking-[-0.4px]'
+export const dashSubtitleCls = 'text-[13.5px] text-text-sub mt-1.5 font-medium m-0'
+export const dashPrimaryBtnCls = 'rounded-lg bg-text-primary text-bg px-4 py-[9px] text-[13px] font-semibold ' +
+  'border-none cursor-pointer font-[inherit] inline-flex items-center gap-1.5 hover:opacity-90 transition-opacity'
+export const dashCardCls = 'bg-surface border border-border rounded-[10px]'
+export const dashSectionLabelCls = 'text-[11px] font-semibold text-text-muted tracking-[0.4px] uppercase'
+export const dashMetaTextCls = 'text-[11px] text-text-muted font-mono tabular-nums'
+export const dashStatGridCls = 'grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-3'
+export const dashTableColsCls = 'grid grid-cols-[minmax(160px,2fr)_72px_minmax(120px,1fr)_56px_110px_120px] ' +
+  'items-center gap-3.5'
+export const dashTableHeaderCellCls = 'text-[10px] font-semibold text-text-muted tracking-[0.4px] uppercase'
+export const dashRowBtnCls = 'bg-transparent border-0 cursor-pointer font-[inherit] text-left ' +
+  'border-t border-border py-3.5 transition-opacity duration-150 hover:opacity-70'
